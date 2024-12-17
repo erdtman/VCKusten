@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "VC Kusten",
-  "version": "0.2",
+  "version": "0.4",
   "description": "connects patients to doctors",
   "icons": {
     "16": "images/icon-16.png",
@@ -19,11 +19,13 @@
         "scripts/mittPTJ.js"
       ],
       "matches": [
+        "https://e-caregiver.se/ptj/vckusten/patients/cases",
         "https://demo-caregiver.e-besok.se/ptj/mittptj-utbildningc/patients/cases"
       ]
     }
   ],
   "host_permissions": [
-    "https://referensgrupp.cgmj4.se/*"
+    "https://referensgrupp.cgmj4.se/*",
+    "https://itoh-web01.ithosted.com:9096/*"
   ]
 }

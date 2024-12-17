@@ -113,7 +113,8 @@ async function updatePatients() {
     })
 
     console.log("updatePatients - requesting mappings from J4");
-    const response = await chrome.runtime.sendMessage({ patients: missing_mappings });
+    const prod = window.location.host === "e-caregiver.se";
+    const response = await chrome.runtime.sendMessage({ patients: missing_mappings, prod: prod });
 
     console.log("updatePatients - saving responses");
     for (mapping in response) {

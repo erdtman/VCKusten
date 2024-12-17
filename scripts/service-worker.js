@@ -10,10 +10,10 @@ function getIdFromURL(url_string) {
     return id;
 }
 
-async function getDoctorFor(p_nr) {
-    console.log(`serivce worker - get doctor for ${p_nr}`);
+async function getDoctorFor(p_nr, host) {
+    console.log(`serivce worker - get doctor for`);
 
-    const search_url = `https://referensgrupp.cgmj4.se/personsearch?civic_reg_nr=${p_nr}&search=S%C3%B6k`;
+    const search_url = `https://${host}/personsearch?civic_reg_nr=${p_nr}&search=S%C3%B6k`;
     const search_response = await fetch(search_url);
     if (!search_response.ok) {
         throw new Error(`Response status: ${search_response.status}`);
@@ -28,7 +28,7 @@ async function getDoctorFor(p_nr) {
 
     console.log(`serivce worker - found patient id ${patient_id}`);
 
-    const patient_url = `https://referensgrupp.cgmj4.se/modules/getJournalHeader/${patient_id}?hideWarnings=false`;
+    const patient_url = `https://${host}/modules/getJournalHeader/${patient_id}?hideWarnings=false`;
     const patient_response = await fetch(patient_url);
     const patient_json = await patient_response.json();
     if (!patient_response.ok) {
@@ -48,9 +48,11 @@ async function getDoctorFor(p_nr) {
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     console.log("serivce worker  - incomming message");
 
+    const host = message.prod ? "todo" : "referensgrupp.cgmj4.se";
+
     const patients_promises = message.patients.map(async patient => {
         try {
-            return getDoctorFor(patient);
+            return getDoctorFor(patient, host);
         } catch (error) {
             // TODO think about handling error
             console.log(error);
