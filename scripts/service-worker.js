@@ -48,7 +48,7 @@ async function getDoctorFor(p_nr, host) {
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     console.log("serivce worker  - incomming message");
 
-    const host = message.prod ? "todo" : "referensgrupp.cgmj4.se";
+    const host = message.prod ? "itoh-web01.ithosted.com:9096" : "referensgrupp.cgmj4.se";
 
     const patients_promises = message.patients.map(async patient => {
         try {

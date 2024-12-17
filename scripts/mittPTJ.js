@@ -87,6 +87,9 @@ function adjustStyle() {
 }
 
 function getText(pnr) {
+    if (!pnr_mappings[pnr]) {
+        return ""
+    }
     if (pnr_mappings[pnr].doctor) {
         return pnr_mappings[pnr].doctor;
     }
@@ -114,7 +117,8 @@ async function updatePatients() {
 
     console.log("updatePatients - requesting mappings from J4");
     const prod = window.location.host === "e-caregiver.se";
-    const response = await chrome.runtime.sendMessage({ patients: missing_mappings, prod: prod });
+    const slised = missing_mappings.slice(0, 2);
+    const response = await chrome.runtime.sendMessage({ patients: slised, prod: prod });
 
     console.log("updatePatients - saving responses");
     for (mapping in response) {
