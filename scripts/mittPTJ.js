@@ -1,5 +1,5 @@
-console.log("chat");
-const pnr_mappings = {};
+
+console.log("mittPTJ starting");
 
 function appendHeader() {
 
@@ -86,63 +86,50 @@ function adjustStyle() {
     console.log(`adjustStyle - done`);
 }
 
-function getText(pnr) {
-    if (!pnr_mappings[pnr]) {
-        return ""
+function getText(mapping) {
+    if (mapping.doctor) {
+        return mapping.doctor;
     }
-    if (pnr_mappings[pnr].doctor) {
-        return pnr_mappings[pnr].doctor;
+
+    if (mapping.message) {
+        return mapping.message;
     }
-    return pnr_mappings[pnr].message ? pnr_mappings[pnr].message : "";
+
+    return "???";
 }
 
 async function updatePatients() {
+    console.log(`updatePatients - start`);
 
-    console.log("updatePatients - reading all pnr fields");
-    const pnr_elements = document.querySelectorAll('[class^=cells__smallText___]');
-    const pnrs = Array.from(pnr_elements).map(pnr_element => {
-        return pnr_element.innerHTML.trim();
-    });
-
-    console.log("updatePatients - filtering out already fetched pnrs");
-    const missing_mappings = pnrs.filter((pnr) => {
-        if (!pnr_mappings[pnr]) {
-            // missing completely
-            return true;
-        }
-
-        // we might have a message object only
-        return !pnr_mappings[pnr].doctor;
-    })
-
-    console.log("updatePatients - requesting mappings from J4");
     const prod = window.location.host === "e-caregiver.se";
-    const slised = missing_mappings.slice(0, 2);
-    const response = await chrome.runtime.sendMessage({ patients: slised, prod: prod });
 
-    console.log("updatePatients - saving responses");
-    for (mapping in response) {
-        pnr_mappings[mapping] = response[mapping];
-    }
+    const pnr_elements = document.querySelectorAll('[class^=cells__smallText___]');
+    console.log(`updatePatients - found ${pnr_elements.length} elements`);
 
-    console.log("updatePatients - decorating");
-    Array.from(pnr_elements).forEach(pnr_element => {
+    const pnrs = Array.from(pnr_elements).map(async pnr_element => {
+        const pnr = pnr_element.innerHTML.trim();
+
+        console.log(`updatePatients - requesting mapping...`);
+
+        const response = await chrome.runtime.sendMessage({ patient: pnr, prod: prod });
+
+        console.log("updatePatients - decorating...");
+
+        // TODO this is error prone
         const name_and_pnr = pnr_element.parentElement.parentElement;
         const row = name_and_pnr.parentElement;
-        const pnr = pnr_element.innerHTML.trim();
 
         if (row.getElementsByClassName("doctor").length > 0) {
             console.log("updatePatients - uppdating doctor");
-            const p = row.getElementsByClassName("doctor")[0]
-            p.innerHTML = getText(pnr);
-            return;
+            const p = row.getElementsByClassName("doctor")[0];
+            p.innerHTML = getText(response);
         } else {
-            console.log("updatePatients - creqting new element for doctor");
+            console.log("updatePatients - creating new element for doctor");
             //<div class=""><span data-test-id="">Läkare</span></div>
 
             const span = document.createElement("span");
             span.className = "doctor";
-            span.innerHTML = getText(pnr)
+            span.innerHTML = getText(pnr, pnr_mappings)
 
             const div = document.createElement("div");
             div.style["display"] = "flex";

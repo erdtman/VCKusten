@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "VC Kusten",
-  "version": "0.4",
+  "version": "0.5",
   "description": "connects patients to doctors",
   "icons": {
     "16": "images/icon-16.png",
@@ -26,6 +26,7 @@
   ],
   "host_permissions": [
     "https://referensgrupp.cgmj4.se/*",
-    "https://itoh-web01.ithosted.com:9096/*"
+
+    "https://itoh-web01.itohosted.com:9096/*"
   ]
 }
