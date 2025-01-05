@@ -57,7 +57,7 @@ async function getDoctorFor(pnr, host) {
 
     const patient_id = getIdFromURL(search_response.url);
     if (!patient_id) {
-        log(`getDoctorFor - no patient found`);
+        console.log(`getDoctorFor - no patient found`);
         return { message: "Användare saknas i J4", patient: pnr };
     }
 
@@ -110,11 +110,11 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             sendResponse(result);
         }).catch(error => {
             console.log(`Service worker - load error: ${error}`);
-            sendResponse({ message: `internal load error, ${error}`, patient: patient });
+            sendResponse({ message: `internal load error, ${error}`, patient: message.patient });
         });
     }).catch(error => {
         console.log(`Service worker - not found in storage ${error}`);
-        sendResponse({ message: `internal storage error, ${error}`, patient: patient });
+        sendResponse({ message: `internal storage error, ${error}`, patient: message.patient });
     });
 
 

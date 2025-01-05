@@ -5,11 +5,13 @@ function removeNonNumeric(str) {
 // Save data to chrome.storage.local
 export async function saveToStorage(pnr, data) {
     const clean_pnr = removeNonNumeric(pnr);
-    return chrome.storage.session.set({ [clean_pnr]: data })
+    const obj = { [clean_pnr]: data };
+    return await chrome.storage.session.set(obj);
 }
 
 // Retrieve data from chrome.storage.local
 export async function getFromStorage(pnr) {
     const clean_pnr = removeNonNumeric(pnr);
-    return chrome.storage.session.get([clean_pnr])[[clean_pnr]];
+    const tmp = await chrome.storage.session.get(clean_pnr);
+    return tmp[clean_pnr];
 }

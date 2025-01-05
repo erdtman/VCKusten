@@ -1,5 +1,18 @@
+import { getText } from './util.js';
 
 console.log("mittPTJ starting");
+
+function getText(mapping) {
+    if (mapping.doctor) {
+        return mapping.doctor;
+    }
+
+    if (mapping.message) {
+        return mapping.message;
+    }
+
+    return "???";
+}
 
 function appendHeader() {
 
@@ -86,18 +99,6 @@ function adjustStyle() {
     console.log(`adjustStyle - done`);
 }
 
-function getText(mapping) {
-    if (mapping.doctor) {
-        return mapping.doctor;
-    }
-
-    if (mapping.message) {
-        return mapping.message;
-    }
-
-    return "???";
-}
-
 async function updatePatients() {
     console.log(`updatePatients - start`);
 
@@ -106,7 +107,7 @@ async function updatePatients() {
     const pnr_elements = document.querySelectorAll('[class^=cells__smallText___]');
     console.log(`updatePatients - found ${pnr_elements.length} elements`);
 
-    const pnrs = Array.from(pnr_elements).map(async pnr_element => {
+    Array.from(pnr_elements).forEach(async pnr_element => {
         const pnr = pnr_element.innerHTML.trim();
 
         console.log(`updatePatients - requesting mapping...`);

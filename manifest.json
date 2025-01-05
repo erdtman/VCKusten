@@ -13,6 +13,9 @@
     "service_worker": "scripts/service-worker.js",
     "type": "module"
   },
+  "permissions": [
+    "storage"
+  ],
   "content_scripts": [
     {
       "js": [
@@ -22,11 +25,18 @@
         "https://e-caregiver.se/ptj/vckusten/patients/cases",
         "https://demo-caregiver.e-besok.se/ptj/mittptj-utbildningc/patients/cases"
       ]
+    },
+    {
+      "js": [
+        "scripts/teleQ.js"
+      ],
+      "matches": [
+        "http://local-teleq.se:9000/"
+      ]
     }
   ],
   "host_permissions": [
     "https://referensgrupp.cgmj4.se/*",
-
     "https://itoh-web01.itohosted.com:9096/*"
   ]
 }
