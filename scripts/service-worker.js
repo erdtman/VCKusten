@@ -80,6 +80,7 @@ async function getDoctorFor(pnr, host) {
 
     console.log(`getDoctorFor - found doctor ${doctor} for ${patient_id}`);
 
+    await delay(1000);
     return { doctor: doctor, patient: pnr };
 };
 
@@ -106,7 +107,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                 await saveToStorage(message.patient, result);
             }
             console.log(`Service worker - returning response`);
-            await delay(1000);
             sendResponse(result);
         }).catch(error => {
             console.log(`Service worker - load error: ${error}`);

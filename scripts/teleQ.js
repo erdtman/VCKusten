@@ -14,6 +14,7 @@ function getText(mapping) {
     return "???";
 }
 
+
 function appendHeader() {
     console.log("appendHeader");
 
@@ -43,7 +44,7 @@ async function updatePatients() {
 
     console.log(`updatePatients - found ${pnr_elements.length} elements`);
 
-    Array.from(pnr_elements).forEach(async pnr_element => {
+    for (const pnr_element of pnr_elements) {
         const row = pnr_element.parentElement;
 
         const pnr = pnr_element.innerHTML;
@@ -63,10 +64,10 @@ async function updatePatients() {
             doctor.innerHTML = getText(response);
             row.appendChild(doctor);
         }
-    });
+    };
 }
 
-function runLoop() {
+async function  runLoop() {
     console.log("runLoop");
 
     console.log("runLoop - adjustStyle");
@@ -76,7 +77,7 @@ function runLoop() {
     appendHeader();
 
     console.log("runLoop - updatePatients");
-    updatePatients();
+    await updatePatients();
 
     console.log("runLoop - setTimeout");
     setTimeout(runLoop, 2000);

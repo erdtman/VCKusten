@@ -107,7 +107,8 @@ async function updatePatients() {
     const pnr_elements = document.querySelectorAll('[class^=cells__smallText___]');
     console.log(`updatePatients - found ${pnr_elements.length} elements`);
 
-    Array.from(pnr_elements).forEach(async pnr_element => {
+
+    for (const pnr_element of pnr_elements) {
         const pnr = pnr_element.innerHTML.trim();
 
         console.log(`updatePatients - requesting mapping...`);
@@ -138,7 +139,7 @@ async function updatePatients() {
 
             name_and_pnr.after(div)
         }
-    });
+    }
 }
 
 function runLoop() {
