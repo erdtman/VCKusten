@@ -142,7 +142,7 @@ async function updatePatients() {
     }
 }
 
-function runLoop() {
+async function runLoop() {
     console.log("runLoop");
 
     console.log("runLoop - adjustStyle");
@@ -152,7 +152,7 @@ function runLoop() {
     appendHeader();
 
     console.log("runLoop - updatePatients");
-    updatePatients();
+    await updatePatients();
 
     console.log("runLoop - setTimeout");
     setTimeout(runLoop, 2000);
