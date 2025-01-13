@@ -153,15 +153,18 @@ async function updatePatients() {
 async function runLoop() {
     console.log("runLoop");
 
-    console.log("runLoop - adjustStyle");
-    adjustStyle()
+    if(document.location.href.includes("/patients/cases")) {
+        console.log("runLoop - adjustStyle");
+        adjustStyle()
 
-    console.log("runLoop - appendHeader");
-    appendHeader();
+        console.log("runLoop - appendHeader");
+        appendHeader();
 
-    console.log("runLoop - updatePatients");
-    await updatePatients();
-
+        console.log("runLoop - updatePatients");
+        await updatePatients();
+    } else {
+        console.log("runLoop - wrong page, do nothing");
+    }
     console.log("runLoop - setTimeout");
     setTimeout(runLoop, 2000);
 }

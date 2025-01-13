@@ -19,6 +19,7 @@
   "content_scripts": [
     {
       "js": [
+        "scripts/utills.js",
         "scripts/mittPTJ.js"
       ],
       "matches": [

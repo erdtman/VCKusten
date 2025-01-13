@@ -10,7 +10,6 @@
                 const new_pnrs = page.match(ssnPattern);
 
                 const unique_pnrs = [...new Set(new_pnrs)];
-                unique_pnrs.push("191212121213"); // just to get one for testing
 
                 window.postMessage({ type: 'new_pnrs', "pnrs": unique_pnrs }, '*');
 
