@@ -2,52 +2,26 @@
 //import DomParser from "dom-parser";
 import { saveToStorage, getFromStorage } from './storage.js';
 
+
 console.log('Service worker loaded');
 
 function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-// TODO this function should have tests
-function getIdFromURL(url_string) {
-    if (url_string.indexOf("personsearch") != -1) {
-        // Failed to find patient - could be because user is not logged in
-        // TODO diffewrentiate between missing and not logged in
-        return null;
-    }
-
-    const url = new URL(url_string);
-    const id = url.searchParams.get("patient");
-    return id;
+function removeNonMatching(str) {
+    return str.replace(new RegExp(`[^/\b\d{8}-\d{4}/`, 'g'), '');
 }
 
-// TODO this function should have tests
-function getDoctorName(doctor_string) {
-    const first_space = doctor_string.indexOf(": ");
-    if (first_space == -1) {
-        return doctor_string;
-    }
-    const second_space = doctor_string.indexOf(" ", first_space + 2);
-    if (second_space == -1) {
-        // This might be strange, we only have one space what does that mean?
-        return doctor_string.substring(first_space + 2);
-    }
-    const third_space = doctor_string.indexOf(" ", second_space + 1);
-    if (third_space == -1) {
-        // we do not have a third space tae whatever is after the first space
-        // this should be the common case
-        return doctor_string.substring(first_space + 2);
-    }
-
-    // We have some extra text lets just take two words after the first space
-    const doctor = doctor_string.substring(first_space + 2, third_space);
-    return doctor;
-}
 
 async function getDoctorFor(pnr, host) {
     console.log(`getDoctorFor - get doctor form ${host}`);
 
-    const search_url = `https://${host}/personsearch?civic_reg_nr=${pnr}&search=S%C3%B6k`;
+    // Split out birth date
+    const birth_date = pnr.substring(0, 8);
+    console.log(`getDoctorFor - searching for ${birth_date}`);
+    const search_url = `https://${host}/personsearch?civic_reg_nr=${birth_date}&search=S%C3%B6k`;
+
     const search_response = await fetch(search_url);
     if (!search_response.ok) {
         return { message: `search error, code: ${search_response.status}`, patient: pnr };
@@ -55,33 +29,54 @@ async function getDoctorFor(pnr, host) {
 
     console.log(`getDoctorFor - search done`);
 
-    const patient_id = getIdFromURL(search_response.url);
-    if (!patient_id) {
-        console.log(`getDoctorFor - no patient found`);
+    const search_text = await search_response.text();
+
+    const table_index = search_text.indexOf('id="patient_result_table"');
+    const table_body_start = search_text.indexOf("tbody", table_index) + 6;
+    const table_body_end = search_text.indexOf("tbody", table_body_start);
+    const table_text = search_text.substring(table_body_start, table_body_end);
+    const rows = table_text.split('<tr class="resultRow ">');
+    console.log(pnr);
+
+    const mappings = rows.map(row => {
+        const cells = row.split('td');
+        const pnr_cell = cells.find(cell => /\b\d{8}-\d{4}/.test(cell));
+
+        if (!pnr_cell) {
+            return null;
+        }
+
+        const pnr_clean = pnr_cell.replace(/[^\b\d{8}-\d{4}]/g, '');
+
+        console.log(cells[11]);
+
+        const doctor = cells[11].substring(8, cells[11].length - 2);
+        // nowrap>Anders Holgersson</
+        // nowrap>Adam Berg</
+        if (doctor === "") {
+            return {
+                patient: pnr_clean,
+                message: "Patienten har ingen angiven läkare"
+            };
+        }
+
+        return {
+            patient: pnr_clean,
+            doctor: doctor
+        };
+    }).filter(row => row !== null);
+
+    const mapping = mappings.find(row_data => {
+        return row_data.patient === pnr;
+    });
+
+    if (!mapping) {
+        console.log(`getDoctorFor - patient not found`);
         return { message: "Användare saknas i J4", patient: pnr };
     }
 
-    console.log(`getDoctorFor - found patient, id: ${patient_id}`);
-
-    const patient_url = `https://${host}/modules/getJournalHeader/${patient_id}?hideWarnings=false`;
-    const patient_response = await fetch(patient_url);
-    if (!patient_response.ok) {
-        console.log(`getDoctorFor - failed to load patient ${patient_id}`);
-        return { message: `load error, code: ${patient_response.status}`, patient: pnr };
-    }
-
-    const patient_json = await patient_response.json();
-    if (!patient_json.subHeaderInfo) {
-        console.log(`getDoctorFor - no doctor found for ${patient_id}`);
-        return { message: "Ingen läkare angiven", patient: pnr };
-    }
-
-    const doctor = getDoctorName(patient_json.subHeaderInfo);
-
-    console.log(`getDoctorFor - found doctor ${doctor} for ${patient_id}`);
-
     await delay(1000);
-    return { doctor: doctor, patient: pnr };
+    return mapping;
 };
 
 const PROD = "itoh-web01.itohosted.com:9096";

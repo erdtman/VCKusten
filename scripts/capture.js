@@ -1,0 +1,24 @@
+
+
+(function (send) {
+    XMLHttpRequest.prototype.send = function () {
+        var callback = this.onreadystatechange
+        this.onreadystatechange = function () {
+            if (this.readyState == 4 && this.responseText) {
+                const page = this.responseText;
+                const ssnPattern = /\b(\d{8}-\d{4})|(\d{12})|(\d{10})/g; // Adjust the pattern based on your SSN format
+                const new_pnrs = page.match(ssnPattern);
+
+                const unique_pnrs = [...new Set(new_pnrs)];
+                unique_pnrs.push("191212121213"); // just to get one for testing
+
+                window.postMessage({ type: 'new_pnrs', "pnrs": unique_pnrs }, '*');
+
+            }
+            if (callback) {
+                callback.apply(this, arguments)
+            }
+        }
+        send.apply(this, arguments)
+    }
+}(XMLHttpRequest.prototype.send))

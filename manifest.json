@@ -32,6 +32,29 @@
       ],
       "matches": [
         "http://local-teleq.se:9000/"
+      ],
+      "run_at": "document_start"
+    },
+    {
+      "js": [
+        "scripts/utills.js",
+        "scripts/teleQ_prod.js"
+      ],
+      "matches": [
+        "https://www4.teleqone.com/teleq/start/index.zul"
+      ],
+      "run_at": "document_start",
+      "type": "module"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "scripts/capture.js"
+      ],
+      "matches": [
+        "http://local-teleq.se:9000/*",
+        "https://www4.teleqone.com/*"
       ]
     }
   ],

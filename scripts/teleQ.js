@@ -67,11 +67,11 @@ async function updatePatients() {
     };
 }
 
-async function  runLoop() {
+async function runLoop() {
     console.log("runLoop");
 
     console.log("runLoop - adjustStyle");
-    adjustStyle()
+    adjustStyle();
 
     console.log("runLoop - appendHeader");
     appendHeader();
@@ -83,4 +83,16 @@ async function  runLoop() {
     setTimeout(runLoop, 2000);
 }
 
-runLoop();
+
+setTimeout(async () => {
+    const script = document.createElement('script');
+    script.src = chrome.runtime.getURL('scripts/capture.js');
+
+    // see also "Dynamic values in the injected code" section in this answer
+    (document.head || document.documentElement).appendChild(script);
+
+    document.addEventListener('DOMContentLoaded', async () => {
+
+        runLoop();
+    });
+}, 0);

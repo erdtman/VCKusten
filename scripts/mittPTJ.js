@@ -1,18 +1,8 @@
-import { getText } from './util.js';
 
 console.log("mittPTJ starting");
 
-function getText(mapping) {
-    if (mapping.doctor) {
-        return mapping.doctor;
-    }
-
-    if (mapping.message) {
-        return mapping.message;
-    }
-
-    return "???";
-}
+const getText = window.shared.getText;
+const removeNonNumeric = window.shared.removeNonNumeric;;
 
 function appendHeader() {
 
@@ -104,12 +94,30 @@ async function updatePatients() {
 
     const prod = window.location.host === "e-caregiver.se";
 
-    const pnr_elements = document.querySelectorAll('[class^=cells__smallText___]');
+    const pnr_elements = document.querySelectorAll('[class*=cells__patientIdentifier___]');
     console.log(`updatePatients - found ${pnr_elements.length} elements`);
 
 
     for (const pnr_element of pnr_elements) {
         const pnr = pnr_element.innerHTML.trim();
+
+
+
+        if(pnr.length < 13) {
+            console.log(`updatePatients - too short pnr "${pnr}", continuing with next`);
+            continue
+        }
+
+        if(pnr.length > 20) {
+            console.log(`updatePatients - too long pnr "${pnr.substring(0,20)}", continuing with next`);
+            continue
+        }
+
+        const pnr_clean = removeNonNumeric(pnr);
+        if(pnr_clean.length !== 12) {
+            console.log(`updatePatients - too long pnr "${pnr_clean}", continuing with next`);
+            continue
+        }
 
         console.log(`updatePatients - requesting mapping...`);
 
@@ -131,7 +139,7 @@ async function updatePatients() {
 
             const span = document.createElement("span");
             span.className = "doctor";
-            span.innerHTML = getText(pnr, pnr_mappings)
+            span.innerHTML = getText(response)
 
             const div = document.createElement("div");
             div.style["display"] = "flex";
