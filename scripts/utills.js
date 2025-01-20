@@ -19,7 +19,7 @@ function getCurrentYearTwoDigits() {
 }
 
 window.shared.normalizePnr = function (pnr) {
-    pnr = removeNonNumeric(pnr);
+    pnr = window.shared.removeNonNumeric(pnr);
     if (pnr.length === 10) {
         const pnr_year = new Number(pnr.substring(0, 2));
         const this_year = new Number(getCurrentYearTwoDigits());

@@ -31,12 +31,13 @@ async function getDoctorFor(pnr, host) {
 
     const search_text = await search_response.text();
 
+
+    // TODO handel failures in call cases here
     const table_index = search_text.indexOf('id="patient_result_table"');
     const table_body_start = search_text.indexOf("tbody", table_index) + 6;
     const table_body_end = search_text.indexOf("tbody", table_body_start);
     const table_text = search_text.substring(table_body_start, table_body_end);
     const rows = table_text.split('<tr class="resultRow ">');
-    console.log(pnr);
 
     const mappings = rows.map(row => {
         const cells = row.split('td');
@@ -48,9 +49,9 @@ async function getDoctorFor(pnr, host) {
 
         const pnr_clean = pnr_cell.replace(/[^\b\d{8}-\d{4}]/g, '');
 
-        console.log(cells[11]);
+        console.log(cells[13]);
 
-        const doctor = cells[11].substring(8, cells[11].length - 2);
+        const doctor = cells[13].substring(8, cells[13].length - 2);
         // nowrap>Anders Holgersson</
         // nowrap>Adam Berg</
         if (doctor === "") {
@@ -75,7 +76,6 @@ async function getDoctorFor(pnr, host) {
         return { message: "Användare saknas i J4", patient: pnr };
     }
 
-    await delay(1000);
     return mapping;
 };
 
@@ -96,6 +96,13 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
         console.log(`Service worker - not found in storage fetching from journal`);
 
+        if (message.storage_only) {
+            console.log(`Service worker - storage only`);
+            return sendResponse({ message: "inte laddad", patient: message.patient });
+        }
+
+        console.log(`Service worker - fetching from journal`);
+
         getDoctorFor(message.patient, host).then(async result => {
             if (result.doctor) {
                 console.log(`Service worker - saving mapping`);
@@ -115,5 +122,15 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
     // Keep the service worker alive until sendResponse is called
     return true;
+});
+
+
+// Function to handle the extension icon click
+chrome.action.onClicked.addListener((tab) => {
+    console.log('Extension icon clicked');
+    console.log('Active Tab:', tab);
+
+    // You can perform any action here, such as sending a message to the content script
+    chrome.tabs.sendMessage(tab.id, { action: 'iconClicked' });
 });
 

@@ -89,7 +89,7 @@ function adjustStyle() {
     console.log(`adjustStyle - done`);
 }
 
-async function updatePatients() {
+async function updatePatients(storage_only = true) {
     console.log(`updatePatients - start`);
 
     const prod = window.location.host === "e-caregiver.se";
@@ -121,7 +121,7 @@ async function updatePatients() {
 
         console.log(`updatePatients - requesting mapping...`);
 
-        const response = await chrome.runtime.sendMessage({ patient: pnr, prod: prod });
+        const response = await chrome.runtime.sendMessage({ patient: pnr, prod: prod, storage_only: storage_only });
 
         console.log("updatePatients - decorating...");
 
@@ -161,7 +161,7 @@ async function runLoop() {
         appendHeader();
 
         console.log("runLoop - updatePatients");
-        await updatePatients();
+        await updatePatients(true);
     } else {
         console.log("runLoop - wrong page, do nothing");
     }
@@ -169,4 +169,18 @@ async function runLoop() {
     setTimeout(runLoop, 2000);
 }
 
+
+
 runLoop();
+
+// Listen for messages from the background script
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message.action === "iconClicked") {
+        console.log("Extension icon clicked in the content script");
+
+        updatePatients(false);
+
+        // Perform any action needed when the icon is clicked
+    }
+});
+

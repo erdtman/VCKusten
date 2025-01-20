@@ -12,7 +12,6 @@
                 const unique_pnrs = [...new Set(new_pnrs)];
 
                 window.postMessage({ type: 'new_pnrs', "pnrs": unique_pnrs }, '*');
-
             }
             if (callback) {
                 callback.apply(this, arguments)

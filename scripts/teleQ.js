@@ -91,8 +91,6 @@ setTimeout(async () => {
     // see also "Dynamic values in the injected code" section in this answer
     (document.head || document.documentElement).appendChild(script);
 
-    document.addEventListener('DOMContentLoaded', async () => {
-
         runLoop();
-    });
+
 }, 0);

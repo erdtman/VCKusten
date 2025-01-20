@@ -6,8 +6,8 @@ getText = window.shared.getText;
 console.log("TeleQ starting");
 
 let pnrs = [];
-async function updatePatients() {
-    console.log(`updatePatients - start`);
+async function updatePatients(storage_only = true) {
+    console.log(`updatePatients - start storage only: ${storage_only}`);
 
     const pnr_elements = document.getElementsByClassName('personal-code');
 
@@ -26,7 +26,7 @@ async function updatePatients() {
 
         const normalize_pnr = normalizePnr(pnr);
         // TODO set real value for prod
-        const response = await chrome.runtime.sendMessage({ patient: normalize_pnr, prod: false });
+        const response = await chrome.runtime.sendMessage({ patient: normalize_pnr, prod: true, storage_only: storage_only });
 
         console.log("updatePatients - decorating...");
 
@@ -41,7 +41,7 @@ async function runLoop() {
     console.log("runLoop");
 
     console.log("runLoop - updatePatients");
-    await updatePatients();
+    await updatePatients(true);
 
     console.log("runLoop - setTimeout");
     setTimeout(runLoop, 2000);
@@ -78,4 +78,16 @@ setTimeout(async () => {
         runLoop();
     });
 }, 0);
+
+
+// Listen for messages from the background script
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message.action === "iconClicked") {
+        console.log("Extension icon clicked in the content script");
+
+        updatePatients(false);
+
+        // Perform any action needed when the icon is clicked
+    }
+});
 
