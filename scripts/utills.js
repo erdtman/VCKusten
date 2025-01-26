@@ -9,7 +9,7 @@ window.shared.getText = function (mapping) {
     return "???";
 }
 
-window.shared.removeNonNumeric = function(str) {
+window.shared.removeNonNumeric = function (str) {
     return str.replace(/\D/g, '');
 }
 
@@ -31,4 +31,10 @@ window.shared.normalizePnr = function (pnr) {
     }
     pnr = pnr.substring(0, 8) + '-' + pnr.substring(8);
     return pnr;
+}
+
+window.shared.containsPnr = function (string) {
+    const ssnPattern = /\b(\d{8}-\d{4})|(\d{12})|(\d{10})/g; // Adjust the pattern based on your SSN format
+    const pnrs = string.match(ssnPattern);
+    return pnrs != null;
 }

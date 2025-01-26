@@ -2,7 +2,8 @@
 console.log("mittPTJ starting");
 
 const getText = window.shared.getText;
-const removeNonNumeric = window.shared.removeNonNumeric;;
+const containsPnr = window.shared.containsPnr;
+const normalizePnr = window.shared.normalizePnr;
 
 function appendHeader() {
 
@@ -101,22 +102,10 @@ async function updatePatients(storage_only = true) {
     for (const pnr_element of pnr_elements) {
         const pnr = pnr_element.innerHTML.trim();
 
-
-
-        if(pnr.length < 13) {
-            console.log(`updatePatients - too short pnr "${pnr}", continuing with next`);
-            continue
-        }
-
-        if(pnr.length > 20) {
-            console.log(`updatePatients - too long pnr "${pnr.substring(0,20)}", continuing with next`);
-            continue
-        }
-
-        const pnr_clean = removeNonNumeric(pnr);
-        if(pnr_clean.length !== 12) {
+        const pnr_clean = normalizePnr(pnr);
+        if (pnr_clean.length !== 13) {
             console.log(`updatePatients - too long pnr "${pnr_clean}", continuing with next`);
-            continue
+            continue;
         }
 
         console.log(`updatePatients - requesting mapping...`);
@@ -150,10 +139,41 @@ async function updatePatients(storage_only = true) {
     }
 }
 
+async function appendPatientHeader(storage_only = true) {
+    const prod = window.location.host === "e-caregiver.se";
+    console.log("appendPatientHeader");
+
+    const header = document.querySelectorAll('[class*=ChatHeader__row___]')[0];
+    if (!header) {
+        return console.log("appendPatientHeader - header not found");
+    }
+
+    let doctor = header.getElementsByClassName("doctor")[0];
+    if(!doctor) {
+        doctor = header.lastChild.cloneNode(true);
+    }
+
+    const pnr_element = Array.from(header.childNodes).find(node => {
+        const text = node.innerHTML;
+        return containsPnr(text);
+    })
+
+    const pnr = normalizePnr(pnr_element.lastChild.innerHTML);
+    const response = await chrome.runtime.sendMessage({ patient: pnr, prod: prod, storage_only: storage_only });
+
+    doctor.className += " doctor";
+
+    doctor.lastChild.innerHTML = getText(response);
+    doctor.firstChild.innerHTML = "Läkare";
+    header.appendChild(doctor);
+}
+
+
 async function runLoop() {
     console.log("runLoop");
-
-    if(document.location.href.includes("/patients/cases")) {
+    if (document.location.href.includes("/patients/case/")) {
+        await appendPatientHeader(true);
+    } else if (document.location.href.includes("/patients/cases")) {
         console.log("runLoop - adjustStyle");
         adjustStyle()
 
@@ -174,13 +194,14 @@ async function runLoop() {
 runLoop();
 
 // Listen for messages from the background script
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
     if (message.action === "iconClicked") {
         console.log("Extension icon clicked in the content script");
-
-        updatePatients(false);
-
-        // Perform any action needed when the icon is clicked
+        if (document.location.href.includes("/patients/case/")) {
+            await appendPatientHeader(false);
+        } else if (document.location.href.includes("/patients/cases")) {
+            await updatePatients(false);
+        }
     }
 });
 

